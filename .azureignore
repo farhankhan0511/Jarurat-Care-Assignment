@@ -1,0 +1,7 @@
+node_modules/
+*.ts
+*.map
+*.log
+.git/
+.gitignore
+.env
