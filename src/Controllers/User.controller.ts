@@ -37,7 +37,7 @@ const LoginSchema=z.object({
 })
 
 
-const UserRegistration=asynchandler(async(req:Request,res:Response)=>{
+export const UserRegistration=asynchandler(async(req:Request,res:Response)=>{
     let validdata:UserrequestBody;
     try {
         validdata=RegistrationSchema.parse(req.body)
@@ -89,7 +89,7 @@ const generateaccessandrefreshtoken=async(user_Id:any)=>{
 }
 
 
-const LoginUser=asynchandler(async(req:Request,res:Response)=>{
+export const LoginUser=asynchandler(async(req:Request,res:Response)=>{
 
     const {email,password}=req.body
     let validlogin:any;
@@ -132,7 +132,7 @@ const LoginUser=asynchandler(async(req:Request,res:Response)=>{
 
 })
 
-const DeleteUser=asynchandler(async(req:Request,res:Response)=>{
+export const DeleteUser=asynchandler(async(req:Request,res:Response)=>{
     const userid=req.user;
     try {
         const existeduser=await User.findById(userid)
@@ -150,7 +150,7 @@ const DeleteUser=asynchandler(async(req:Request,res:Response)=>{
     }
 })
 
-const UpdateUserphone=asynchandler(async(req:Request,res:Response)=>{
+export const UpdateUserphone=asynchandler(async(req:Request,res:Response)=>{
     const user=req.user;
     const {phone}=req.body;
     try {
@@ -170,9 +170,31 @@ const UpdateUserphone=asynchandler(async(req:Request,res:Response)=>{
 
 })
 
+export const changeCurrentPassword=asynchandler(async(req:Request,res:Response)=>{
+
+    const {oldPassword,newPassword}=req.body
+    const user= await User.findById(req.user?._id)
+    if(!user){
+        return res.status(statuscodes.NOTFOUND).json(new ApiResponse(statuscodes.NOTFOUND,{},"No user Found"))
+    }
+    const isPassword=await user.isPasswordCorrect(oldPassword)
+
+    if(!isPassword){
+        return res.status(statuscodes.BADREQUEST).json(new ApiResponse(statuscodes.BADREQUEST,{},"Incorrect Password"))
+  
+
+    }
+
+    user.password=newPassword
+    await user.save({validateBeforeSave:false})
+
+
+    return res.status(statuscodes.SUCCESFULL).json(new ApiResponse(statuscodes.SUCCESFULL,{},"Password Changed Successfully"))
+
+})
 
 
 
 
 
-export {UserRegistration,LoginUser,DeleteUser}
+

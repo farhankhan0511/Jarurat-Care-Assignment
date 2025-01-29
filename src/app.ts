@@ -10,5 +10,11 @@ app.use(express.urlencoded({limit:"16kb",extended:true}));
 app.use(express.static("public"));
 
 
+import Userrouter from "./routes/User.routes"
+import volunteerrouter from "./routes/Volunteer.routes"
+
+app.use("/user",Userrouter);
+app.use("/volunteer",volunteerrouter);
+
 export default app;
 

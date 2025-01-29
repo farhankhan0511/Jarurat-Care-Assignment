@@ -18,7 +18,7 @@ const OpeningSchema=z.object({
     Benifits:z.string()
 })
 
-const Addopening=asynchandler(async(req:Request,res:Response)=>{
+export const Addopening=asynchandler(async(req:Request,res:Response)=>{
     const admin=req.admin;
     const {Title,Description,Capacity,Benifits}=req.body;
     const imagepath=req.file?.path;
@@ -66,7 +66,7 @@ const Addopening=asynchandler(async(req:Request,res:Response)=>{
 })
 
 //this will be an put http
-const UpdateOpening=asynchandler(async(req:Request,res:Response)=>{
+export const UpdateOpening=asynchandler(async(req:Request,res:Response)=>{
     const admin=req.admin;
     const {openingid}=req.params;
     const {Title,Description,Capacity,Benifits}=req.body;
@@ -129,7 +129,7 @@ const UpdateOpening=asynchandler(async(req:Request,res:Response)=>{
 
 })
 
-const DeleteOpening=asynchandler(async(req:Request,res:Response)=>{
+export const DeleteOpening=asynchandler(async(req:Request,res:Response)=>{
 
     const admin=req.admin;
     const {openingid}=req.params;
@@ -164,7 +164,7 @@ const DeleteOpening=asynchandler(async(req:Request,res:Response)=>{
     }
 })
 
-const RegisterVolunteer=asynchandler(async(req:Request,res:Response)=>{
+export const RegisterVolunteer=asynchandler(async(req:Request,res:Response)=>{
     try {
         const user=req.user;
         const opening_id=req.params;
@@ -213,7 +213,7 @@ const RegisterVolunteer=asynchandler(async(req:Request,res:Response)=>{
 
 })
 
-const getallOpenings=asynchandler(async(req:Request,res:Response)=>{
+export const getallOpenings=asynchandler(async(req:Request,res:Response)=>{
     try {
         
         const volunteeropenings=await VolunteerOpening.find({})
@@ -226,7 +226,7 @@ const getallOpenings=asynchandler(async(req:Request,res:Response)=>{
         return res.status(statuscodes.NOTFOUND).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error fetching openings"))
     }
 })
-const getopeningbyId=asynchandler(async(req:Request,res:Response)=>{
+export const getopeningbyId=asynchandler(async(req:Request,res:Response)=>{
    try {
      const {openid}=req.params;
      const existedopening=await VolunteerOpening.findById(openid);
@@ -240,7 +240,7 @@ const getopeningbyId=asynchandler(async(req:Request,res:Response)=>{
    }
 })
 
-const getApplicants=asynchandler(async(req:Request,res:Response)=>{
+export const getApplicants=asynchandler(async(req:Request,res:Response)=>{
    try {
      const {opening}=req.params;
  

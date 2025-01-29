@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const Volunteeropening_controller_1 = require("../Controllers/Volunteeropening.controller");
+const isadmin_middleware_1 = require("../middlewares/isadmin.middleware");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const multer_middleware_1 = require("../middlewares/multer.middleware");
+const router = (0, express_1.Router)();
+router.route("/add").post(auth_middleware_1.verifyJWT, isadmin_middleware_1.isadmin, multer_middleware_1.upload.single("Image"), Volunteeropening_controller_1.Addopening);
+router.route("/delete").delete(auth_middleware_1.verifyJWT, isadmin_middleware_1.isadmin, Volunteeropening_controller_1.DeleteOpening);
+router.route("/update").put(auth_middleware_1.verifyJWT, isadmin_middleware_1.isadmin, multer_middleware_1.upload.single("Image"), Volunteeropening_controller_1.UpdateOpening);
+router.route("/all").get(auth_middleware_1.verifyJWT, isadmin_middleware_1.isadmin, Volunteeropening_controller_1.getallOpenings);
+router.route("/get/:id").get(Volunteeropening_controller_1.getopeningbyId);
+router.route("/getapplicants").get(auth_middleware_1.verifyJWT, isadmin_middleware_1.isadmin, Volunteeropening_controller_1.getApplicants);
+exports.default = router;
