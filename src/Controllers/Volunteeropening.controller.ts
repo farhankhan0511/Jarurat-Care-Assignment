@@ -20,7 +20,8 @@ const OpeningSchema=z.object({
 
 export const Addopening=asynchandler(async(req:Request,res:Response)=>{
     const admin=req.admin;
-    const {Title,Description,Capacity,Benifits}=req.body;
+    let {Title,Description,Capacity,Benifits}=req.body;
+    Capacity=Number(Capacity)
     const imagepath=req.file?.path;
     const exist=await User.findById(admin._id)
     try {
@@ -54,10 +55,10 @@ export const Addopening=asynchandler(async(req:Request,res:Response)=>{
         }
         res.status(statuscodes.CREATED).json(new ApiResponse(statuscodes.CREATED,open,"Created Successfully"))
 
-        VolunteerOpening.create()
+    
 
-    } catch (error) {
-        res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Internal Error while Adding an Volunteer Opening"))
+    } catch (error:any) {
+        res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},error.message||"Internal Error while Adding an Volunteer Opening"))
    
     }
 
@@ -69,9 +70,14 @@ export const Addopening=asynchandler(async(req:Request,res:Response)=>{
 export const UpdateOpening=asynchandler(async(req:Request,res:Response)=>{
     const admin=req.admin;
     const {openingid}=req.params;
-    const {Title,Description,Capacity,Benifits}=req.body;
+    let {Title,Description,Capacity,Benifits}=req.body;
+    Capacity=Number(Capacity);
     const imagepath=req.file?.path;
-    
+    if(!imagepath){
+        return res.status(statuscodes.BADREQUEST).json(
+            new ApiResponse(statuscodes.BADREQUEST,{},"no image doesn't exists")
+        )
+    }
     
     try {
         const exist=await User.findById(admin._id)
@@ -96,11 +102,12 @@ export const UpdateOpening=asynchandler(async(req:Request,res:Response)=>{
             
             await removeimagefromcloudinary(existopening.Image)
         } catch (error) {
-            res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error while updating"))
+            return res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error while updating"))
         }
-        const newImage=imagepath && await uploadimageoncloudinary(imagepath);
+        
+        const newImage=await uploadimageoncloudinary(imagepath);
         if(!newImage){
-            res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error while updating the image"))
+            return res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error while updating the image"))
        
         }
                 
@@ -167,7 +174,7 @@ export const DeleteOpening=asynchandler(async(req:Request,res:Response)=>{
 export const RegisterVolunteer=asynchandler(async(req:Request,res:Response)=>{
     try {
         const user=req.user;
-        const opening_id=req.params;
+        const {openingid}=req.params;
         const Resumepath=req.file?.path;
         const existuser=await User.findById(user._id)
         if(!existuser){        
@@ -175,7 +182,7 @@ export const RegisterVolunteer=asynchandler(async(req:Request,res:Response)=>{
             new ApiResponse(statuscodes.NOTFOUND,{},"User doesn't exists")
             )        
         }
-        const opening=await VolunteerOpening.findById(opening_id);
+        const opening=await VolunteerOpening.findById(openingid);
         if(!opening){        
             return res.status(statuscodes.NOTFOUND).json(
             new ApiResponse(statuscodes.NOTFOUND,{},"Opening doesn't exists")
@@ -242,23 +249,23 @@ export const getopeningbyId=asynchandler(async(req:Request,res:Response)=>{
 
 export const getApplicants=asynchandler(async(req:Request,res:Response)=>{
    try {
-     const {opening}=req.params;
+     const {openingid}=req.params;
  
-     if(!opening){
+     if(!openingid){
          return res.status(statuscodes.BADREQUEST).json(new ApiResponse(statuscodes.BADREQUEST,{},"Opening Id is required"))
      }
-     const existedopening=await VolunteerOpening.findById(opening);
+     const existedopening=await VolunteerOpening.findById(openingid);
      if(!existedopening){
          return res.status(statuscodes.NOTFOUND).json(new ApiResponse(statuscodes.NOTFOUND,{},"Opening doesn't exist"))
      }
-     const applicants=await VolunteerRegistration.find({Opening:opening}).populate("User","Name email Phone").populate("VolunteerOpening","Title Description").exec()
+     const applicants=await VolunteerRegistration.find({Opening:openingid}).populate("User","Name email Phone").populate("Opening","Title Description").exec()
      if(!applicants){
          return res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Error while fetching the applicants"));  
      }
      res.status(statuscodes.SUCCESFULL).json(new ApiResponse(statuscodes.SUCCESFULL,applicants,"Applicants are genrated successfully"));
  
-   } catch (error) {
-    res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},"Applicants are genrated successfully"));
+   } catch (error:any) {
+    res.status(statuscodes.INTERNALERROR).json(new ApiResponse(statuscodes.INTERNALERROR,{},error.message || "Internal Server Error"));
  
    }
 })

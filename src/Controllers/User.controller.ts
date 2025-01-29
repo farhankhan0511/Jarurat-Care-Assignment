@@ -55,6 +55,7 @@ export const UserRegistration=asynchandler(async(req:Request,res:Response)=>{
    
 
     const user=await User.create({
+        Name:validdata.Name,
         username:validdata.username,
         Phone:validdata.Phone,
         email:validdata.email,

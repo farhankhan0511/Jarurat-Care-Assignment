@@ -18,7 +18,8 @@ const OpeningSchema = zod_1.z.object({
 });
 exports.Addopening = (0, asynchandler_1.asynchandler)(async (req, res) => {
     const admin = req.admin;
-    const { Title, Description, Capacity, Benifits } = req.body;
+    let { Title, Description, Capacity, Benifits } = req.body;
+    Capacity = Number(Capacity);
     const imagepath = req.file?.path;
     const exist = await User_model_1.User.findById(admin._id);
     try {
@@ -44,18 +45,21 @@ exports.Addopening = (0, asynchandler_1.asynchandler)(async (req, res) => {
             return res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Internal error while opening the volunteer post"));
         }
         res.status(constants_1.statuscodes.CREATED).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.CREATED, open, "Created Successfully"));
-        VolunteerOpening_model_1.VolunteerOpening.create();
     }
     catch (error) {
-        res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Internal Error while Adding an Volunteer Opening"));
+        res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, error.message || "Internal Error while Adding an Volunteer Opening"));
     }
 });
 //this will be an put http
 exports.UpdateOpening = (0, asynchandler_1.asynchandler)(async (req, res) => {
     const admin = req.admin;
     const { openingid } = req.params;
-    const { Title, Description, Capacity, Benifits } = req.body;
+    let { Title, Description, Capacity, Benifits } = req.body;
+    Capacity = Number(Capacity);
     const imagepath = req.file?.path;
+    if (!imagepath) {
+        return res.status(constants_1.statuscodes.BADREQUEST).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.BADREQUEST, {}, "no image doesn't exists"));
+    }
     try {
         const exist = await User_model_1.User.findById(admin._id);
         if (!exist) {
@@ -73,11 +77,11 @@ exports.UpdateOpening = (0, asynchandler_1.asynchandler)(async (req, res) => {
             await (0, imageupload_1.removeimagefromcloudinary)(existopening.Image);
         }
         catch (error) {
-            res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Error while updating"));
+            return res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Error while updating"));
         }
-        const newImage = imagepath && await (0, imageupload_1.uploadimageoncloudinary)(imagepath);
+        const newImage = await (0, imageupload_1.uploadimageoncloudinary)(imagepath);
         if (!newImage) {
-            res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Error while updating the image"));
+            return res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Error while updating the image"));
         }
         const updatedopening = await VolunteerOpening_model_1.VolunteerOpening.findByIdAndUpdate(existopening._id, {
             Title: validdata.Title,
@@ -123,13 +127,13 @@ exports.DeleteOpening = (0, asynchandler_1.asynchandler)(async (req, res) => {
 exports.RegisterVolunteer = (0, asynchandler_1.asynchandler)(async (req, res) => {
     try {
         const user = req.user;
-        const opening_id = req.params;
+        const { openingid } = req.params;
         const Resumepath = req.file?.path;
         const existuser = await User_model_1.User.findById(user._id);
         if (!existuser) {
             return res.status(constants_1.statuscodes.NOTFOUND).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.NOTFOUND, {}, "User doesn't exists"));
         }
-        const opening = await VolunteerOpening_model_1.VolunteerOpening.findById(opening_id);
+        const opening = await VolunteerOpening_model_1.VolunteerOpening.findById(openingid);
         if (!opening) {
             return res.status(constants_1.statuscodes.NOTFOUND).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.NOTFOUND, {}, "Opening doesn't exists"));
         }
@@ -181,21 +185,21 @@ exports.getopeningbyId = (0, asynchandler_1.asynchandler)(async (req, res) => {
 });
 exports.getApplicants = (0, asynchandler_1.asynchandler)(async (req, res) => {
     try {
-        const { opening } = req.params;
-        if (!opening) {
+        const { openingid } = req.params;
+        if (!openingid) {
             return res.status(constants_1.statuscodes.BADREQUEST).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.BADREQUEST, {}, "Opening Id is required"));
         }
-        const existedopening = await VolunteerOpening_model_1.VolunteerOpening.findById(opening);
+        const existedopening = await VolunteerOpening_model_1.VolunteerOpening.findById(openingid);
         if (!existedopening) {
             return res.status(constants_1.statuscodes.NOTFOUND).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.NOTFOUND, {}, "Opening doesn't exist"));
         }
-        const applicants = await VolunteerRegistration_model_1.VolunteerRegistration.find({ Opening: opening }).populate("User", "Name email Phone").populate("VolunteerOpening", "Title Description").exec();
+        const applicants = await VolunteerRegistration_model_1.VolunteerRegistration.find({ Opening: openingid }).populate("User", "Name email Phone").populate("Opening", "Title Description").exec();
         if (!applicants) {
             return res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Error while fetching the applicants"));
         }
         res.status(constants_1.statuscodes.SUCCESFULL).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.SUCCESFULL, applicants, "Applicants are genrated successfully"));
     }
     catch (error) {
-        res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, "Applicants are genrated successfully"));
+        res.status(constants_1.statuscodes.INTERNALERROR).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.INTERNALERROR, {}, error.message || "Internal Server Error"));
     }
 });

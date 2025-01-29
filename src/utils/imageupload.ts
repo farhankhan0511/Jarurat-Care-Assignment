@@ -13,12 +13,16 @@ export const uploadimageoncloudinary=async(localpath:string):Promise<any>=>{
         if(!localpath)return null;
         const response=await cloudinary.uploader.upload(localpath,{resource_type:"image"})
         console.log("image is uploaded on cloudinary",response.url)
-        fs.unlinkSync(localpath)
+        if (fs.existsSync(localpath)) {
+            fs.unlinkSync(localpath);  // Ensure the file exists before deleting it
+        }
         return response;
         
         
     } catch (error) {
-        fs.unlinkSync(localpath)
+        if (fs.existsSync(localpath)) {
+            fs.unlinkSync(localpath);  // Ensure the file exists before deleting it
+        }
         return null;
     }
 }

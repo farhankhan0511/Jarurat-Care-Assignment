@@ -30,6 +30,7 @@ exports.UserRegistration = (0, asynchandler_1.asynchandler)(async (req, res) => 
         return res.status(constants_1.statuscodes.BADREQUEST).json(new ApiRespnse_1.ApiResponse(constants_1.statuscodes.BADREQUEST, {}, "User already exists"));
     }
     const user = await User_model_1.User.create({
+        Name: validdata.Name,
         username: validdata.username,
         Phone: validdata.Phone,
         email: validdata.email,
