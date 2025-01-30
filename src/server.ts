@@ -5,7 +5,7 @@ import { DBCONNECT } from "./db/db";
 DBCONNECT()
 .then(
     ()=>{
-        app.listen(process.env.PORT || 8080,()=>{
+        app.listen(process.env.PORT || 8182,()=>{
             console.log("server is running")
         })
     }
