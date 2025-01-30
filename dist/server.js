@@ -8,7 +8,7 @@ const app_1 = __importDefault(require("./app"));
 const db_1 = require("./db/db");
 (0, db_1.DBCONNECT)()
     .then(() => {
-    app_1.default.listen(process.env.PORT || 4000, () => {
+    app_1.default.listen(process.env.PORT || 8080, () => {
         console.log("server is running");
     });
 })
