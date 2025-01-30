@@ -38,7 +38,13 @@ This project aims to support **Jarurat Care NGO** in managing volunteer openings
 - **Database:** MongoDB
 - **Authentication:** JWT (JSON Web Token)
 - **File Handling:** Multer middleware for handling image uploads and resume files.
-- **Deployment:** The API has been successfully **deployed on Azure** and is available for use.
+- **Deployment:** The API has been successfully **deployed on Azure** and is available for use:  https://jaruratngobackend.azurewebsites.net/
+
+##AdminCredentials##
+- email:"johndoe@example.com"
+- password:"NewPassword456"
+
+
 
 ## Vision
 
